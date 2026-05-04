@@ -3,41 +3,90 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>hermes-body</title>
+	<title>hermes-body — Reachy Mini app</title>
 	<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-	<div class="hero">
-		<div class="icon">🧠</div>
-		<h1>hermes-body</h1>
-		<p class="tagline">Reachy Mini front end for Nous Research's hermes-agent</p>
+	<div class="page">
+		<header class="hero">
+			<div class="container hero-layout">
+				<div class="hero-copy">
+					<p class="eyebrow">Reachy Mini App</p>
+					<h1>hermes-body</h1>
+					<p class="tagline">A voice-driven brain for Reachy Mini, backed by Nous Research's hermes-agent.</p>
+					<p class="lede">
+						OpenAI Realtime drives the sub-second voice loop and robot motion (look, dance, antennas, camera).
+						A single <code>ask_hermes</code> tool reaches a local hermes-agent for web search, calendar, and persistent memory.
+						Cross-channel memory stays in sync via post-turn syncs.
+					</p>
+					<div class="hero-actions">
+						<a class="btn btn-primary" href="https://github.com/The-Focus-AI/hermes-body" target="_blank" rel="noreferrer">View on GitHub</a>
+						<a class="btn" href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noreferrer">hermes-agent</a>
+					</div>
+				</div>
+				<div class="hero-visual">
+					<div class="brain-card">
+						<div class="brain-emoji">🧠</div>
+						<div class="brain-stack">
+							<span>OpenAI Realtime · voice + motion</span>
+							<span class="arrow">↕ ask_hermes</span>
+							<span>hermes-agent · memory + tools</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<main class="content">
+			<section class="info-grid container">
+				<div class="info-card">
+					<div class="info-icon">🎙️</div>
+					<h3>Realtime voice</h3>
+					<p>Sub-second turn-taking. The robot listens through its mic, OpenAI Realtime handles ASR + reasoning + TTS in a single WebSocket.</p>
+				</div>
+				<div class="info-card">
+					<div class="info-icon">🤖</div>
+					<h3>Embodied tools</h3>
+					<p>Eight robot tools: <code>look</code>, <code>antennas</code>, <code>emotion</code>, <code>dance</code>, <code>camera</code>, <code>face_tracking</code>, <code>stop_moves</code>, <code>idle</code>.</p>
+				</div>
+				<div class="info-card">
+					<div class="info-icon">🧠</div>
+					<h3>Knowledge backend</h3>
+					<p>One <code>ask_hermes</code> tool reaches a hermes-agent container for web search, calendar, files, and long-term memory.</p>
+				</div>
+			</section>
+
+			<section class="container install">
+				<h2>Install on your Reachy Mini</h2>
+				<ol class="steps">
+					<li>
+						<strong>Run hermes-agent</strong> in Docker on a machine reachable from the robot. Enable its OpenAI-compatible API server and note the base URL + API key.
+						<a href="https://github.com/The-Focus-AI/hermes-body#2-run-hermes-agent-in-docker" target="_blank" rel="noreferrer">Setup guide →</a>
+					</li>
+					<li>
+						<strong>Install the app</strong> from the Reachy Mini dashboard (Apps tab → search "hermes-body"), or via the daemon API:
+						<pre><code>curl -X POST http://localhost:8000/api/apps/install \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://huggingface.co/spaces/wschenk/hermes-body"}'</code></pre>
+					</li>
+					<li>
+						<strong>Configure</strong> the OpenAI API key and hermes-agent endpoint via env vars on the robot. See the README for details.
+					</li>
+					<li>
+						<strong>Start it</strong> from the dashboard. The robot listens on its mic and starts moving.
+					</li>
+				</ol>
+			</section>
+		</main>
+
+		<footer class="footer">
+			<p>
+				🧠 hermes-body ·
+				<a href="https://github.com/The-Focus-AI/hermes-body" target="_blank" rel="noreferrer">GitHub</a> ·
+				<a href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noreferrer">hermes-agent</a> ·
+				<a href="https://huggingface.co/spaces?filter=reachy_mini" target="_blank" rel="noreferrer">More Reachy Mini apps</a>
+			</p>
+		</footer>
 	</div>
-
-	<main class="container">
-		<section class="card">
-			<h2>What it is</h2>
-			<p>OpenAI Realtime is the embodied "brain" — sub-second voice loop and robot motion tools. <a href="https://github.com/NousResearch/hermes-agent">hermes-agent</a> is the knowledge backend, reachable via a single <code>ask_hermes</code> tool. Cross-channel memory stays in sync via post-turn syncs.</p>
-		</section>
-
-		<section class="card">
-			<h2>Requires</h2>
-			<ul>
-				<li>An OpenAI API key (Realtime access)</li>
-				<li>A running hermes-agent Docker container with its OpenAI-compatible HTTP API enabled</li>
-			</ul>
-			<p>See the <a href="https://github.com/The-Focus-AI/hermes-body">GitHub repo</a> for setup.</p>
-		</section>
-
-		<section class="card">
-			<h2>Tools</h2>
-			<p>Robot-side: <code>look</code>, <code>antennas</code>, <code>emotion</code>, <code>dance</code>, <code>camera</code>, <code>face_tracking</code>, <code>stop_moves</code>, <code>idle</code>. Knowledge-side: <code>ask_hermes</code>.</p>
-		</section>
-	</main>
-
-	<footer>
-		<a href="https://github.com/The-Focus-AI/hermes-body">GitHub</a>
-		·
-		<a href="https://github.com/NousResearch/hermes-agent">hermes-agent</a>
-	</footer>
 </body>
 </html>
