@@ -109,6 +109,15 @@ class HeadLookMove(Move):
         "front": (0, 0, 0, 0, 0, 0),  # neutral
     }
 
+    # Expressive antenna positions for each look direction.
+    ANTENNAS_MAP: dict[str, tuple[float, float]] = {
+        "left": (-50.0, 20.0),   # left antenna out, right slightly up
+        "right": (20.0, -50.0),  # right antenna out, left slightly up
+        "up": (40.0, 40.0),      # both perked up
+        "down": (-30.0, -30.0),  # both drooped down
+        "front": (0.0, 0.0),     # neutral
+    }
+
     def __init__(
         self,
         direction: str,
@@ -134,7 +143,9 @@ class HeadLookMove(Move):
         self.target_pose = create_head_pose(
             x=params[0], y=params[1], z=params[2], roll=params[3], pitch=params[4], yaw=params[5], degrees=True, mm=True
         )
-        self.target_antennas = np.array([0.0, 0.0])
+        # Expressive antenna target for this look direction
+        ant = self.ANTENNAS_MAP.get(direction, (0.0, 0.0))
+        self.target_antennas = np.array([np.deg2rad(ant[0]), np.deg2rad(ant[1])], dtype=np.float64)
 
     @property
     def duration(self) -> float:
@@ -156,6 +167,61 @@ class HeadLookMove(Move):
         antennas = (1 - alpha) * self.start_antennas + alpha * self.target_antennas
 
         return (head_pose, antennas.astype(np.float64), 0.0)
+
+
+class AntennaMove(Move):
+    """Move only the antennas to an expressive position, keeping head still."""
+
+    # Named antenna presets — angles in degrees (left, right)
+    PRESETS: dict[str, tuple[float, float]] = {
+        "curious": (50.0, 30.0),
+        "excited": (60.0, 60.0),
+        "sad": (-40.0, -40.0),
+        "point_left": (-70.0, 20.0),
+        "point_right": (20.0, -70.0),
+        "listen": (15.0, 15.0),
+        "surprised": (70.0, 70.0),
+        "shy": (-30.0, -30.0),
+        "angry": (-50.0, 50.0),
+        "confused": (30.0, -30.0),
+        "neutral": (0.0, 0.0),
+        "wiggle": (40.0, -40.0),
+        "perk_left": (50.0, 0.0),
+        "perk_right": (0.0, 50.0),
+        "droop": (-50.0, -50.0),
+    }
+
+    def __init__(
+        self,
+        preset: str,
+        start_pose: NDArray[np.float32],
+        start_antennas: tuple[float, float],
+        duration: float = 0.6,
+    ):
+        self.preset = preset
+        self.start_pose = start_pose
+        self.start_antennas = np.array(start_antennas, dtype=np.float64)
+        self._duration = duration
+
+        angles = self.PRESETS.get(preset, (0.0, 0.0))
+        self.target_antennas = np.array(
+            [np.deg2rad(angles[0]), np.deg2rad(angles[1])], dtype=np.float64
+        )
+
+    @property
+    def duration(self) -> float:
+        return self._duration
+
+    def update_start(self, pose: NDArray[np.float32], antennas: tuple[float, float]) -> None:
+        self.start_pose = pose
+        self.start_antennas = np.array(antennas, dtype=np.float64)
+
+    def evaluate(self, t: float) -> tuple:
+        alpha = min(1.0, t / self._duration)
+        alpha = alpha * alpha * (3 - 2 * alpha)
+        antennas = (1 - alpha) * self.start_antennas + alpha * self.target_antennas
+        # Head stays put — return current pose unchanged
+        return (self.start_pose, antennas.astype(np.float64), 0.0)
 
 
 def combine_full_body(primary: FullBodyPose, secondary: FullBodyPose) -> FullBodyPose:

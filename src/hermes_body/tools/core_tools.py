@@ -244,6 +244,48 @@ TOOL_SPECS = [
     },
     {
         "type": "function",
+        "name": "antennas",
+        "description": (
+            "Move the robot's antennas (two expressive stalks on its head) to show "
+            "mood, attention, or emphasis. The antennas can move independently — "
+            "use them to be more expressive during conversation."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "preset": {
+                    "type": "string",
+                    "enum": [
+                        "curious",
+                        "excited",
+                        "sad",
+                        "point_left",
+                        "point_right",
+                        "listen",
+                        "surprised",
+                        "shy",
+                        "angry",
+                        "confused",
+                        "neutral",
+                        "wiggle",
+                        "perk_left",
+                        "perk_right",
+                        "droop",
+                    ],
+                    "description": (
+                        "Antenna preset: curious (one up), excited (both up), sad (both down), "
+                        "point_left/right (directional), listen (slightly forward), "
+                        "surprised (both max up), shy (both drooped), angry (one up one down), "
+                        "confused (asymmetric), neutral (center), wiggle (opposing), "
+                        "perk_left/right (one ear up), droop (both fully down)"
+                    ),
+                }
+            },
+            "required": ["preset"],
+        },
+    },
+    {
+        "type": "function",
         "name": "stop_moves",
         "description": "Stop all current movements and clear the movement queue.",
         "parameters": {"type": "object", "properties": {}, "required": []},
@@ -279,6 +321,7 @@ async def dispatch_tool_call(
         "face_tracking": _handle_face_tracking,
         "dance": _handle_dance,
         "emotion": _handle_emotion,
+        "antennas": _handle_antennas,
         "stop_moves": _handle_stop_moves,
         "idle": _handle_idle,
     }
@@ -493,3 +536,23 @@ async def _handle_stop_moves(args: dict, deps: ToolDependencies) -> dict:
 
 async def _handle_idle(args: dict, deps: ToolDependencies) -> dict:
     return {"status": "success", "message": "Staying idle"}
+
+
+async def _handle_antennas(args: dict, deps: ToolDependencies) -> dict:
+    """Move antennas to an expressive preset position."""
+    from hermes_body.moves import AntennaMove
+
+    preset = args.get("preset", "neutral")
+    try:
+        current_head = deps.robot.get_current_head_pose()
+        _, current_ant = deps.robot.get_current_joint_positions()
+        move = AntennaMove(
+            preset=preset,
+            start_pose=current_head,
+            start_antennas=tuple(current_ant),
+            duration=0.6,
+        )
+        deps.movement_manager.queue_move(move)
+        return {"status": "success", "preset": preset}
+    except Exception as e:
+        return {"error": str(e)}
