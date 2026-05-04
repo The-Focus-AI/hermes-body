@@ -1,0 +1,24 @@
+[Unit]
+Description=Auto-launch hermes-body via the Reachy Mini dashboard on boot
+Wants=reachy-mini-daemon.service
+After=reachy-mini-daemon.service network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+User=pollen
+# Wait for the dashboard, then start hermes-body. Retries for up to 60s in
+# case the daemon takes a while to come up.
+ExecStart=/bin/bash -c '\
+  for i in $(seq 1 60); do \
+    if curl -fsS -o /dev/null --max-time 2 http://localhost:8000/api/apps/current-app-status; then \
+      echo "Dashboard up after $${i}s — starting hermes-body"; \
+      curl -fsS -X POST http://localhost:8000/api/apps/start-app/hermes-body || true; \
+      exit 0; \
+    fi; \
+    sleep 1; \
+  done; \
+  echo "Dashboard never came up after 60s"; exit 1'
+
+[Install]
+WantedBy=multi-user.target
