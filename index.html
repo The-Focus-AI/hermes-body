@@ -3,90 +3,223 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="color-scheme" content="light dark" />
+	<meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)" />
+	<meta name="theme-color" content="#0c0a09" media="(prefers-color-scheme: dark)" />
 	<title>hermes-body — Reachy Mini app</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script>
+		tailwind.config = {
+			darkMode: 'media',
+			theme: {
+				extend: {
+					fontFamily: {
+						sans: ['"IBM Plex Sans"', '"Hanken Grotesk"', 'Barlow', '"Host Grotesk"', '"DM Sans"', 'system-ui', 'sans-serif'],
+						mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+					},
+				},
+			},
+		};
+	</script>
 	<link rel="stylesheet" href="style.css" />
 </head>
-<body>
-	<div class="page">
-		<header class="hero">
-			<div class="container hero-layout">
-				<div class="hero-copy">
-					<p class="eyebrow">Reachy Mini App</p>
-					<h1>hermes-body</h1>
-					<p class="tagline">A voice-driven brain for Reachy Mini, backed by Nous Research's hermes-agent.</p>
-					<p class="lede">
-						OpenAI Realtime drives the sub-second voice loop and robot motion (look, dance, antennas, camera).
-						A single <code>ask_hermes</code> tool reaches a local hermes-agent for web search, calendar, and persistent memory.
-						Cross-channel memory stays in sync via post-turn syncs.
+<body class="font-sans antialiased bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-50 selection:bg-[#C8102E] selection:text-white">
+
+	<nav class="border-b border-stone-200 dark:border-stone-800">
+		<div class="max-w-6xl mx-auto px-4 md:px-8 flex items-center justify-between h-16">
+			<a href="#" class="text-sm font-medium tracking-widest uppercase text-stone-900 dark:text-stone-50">
+				hermes-body
+			</a>
+			<div class="hidden md:flex items-center gap-8">
+				<a href="#overview" class="text-sm text-stone-900/60 dark:text-stone-50/60 hover:text-stone-900 dark:hover:text-stone-50 transition-colors min-h-[44px] flex items-center">Overview</a>
+				<a href="#install" class="text-sm text-stone-900/60 dark:text-stone-50/60 hover:text-stone-900 dark:hover:text-stone-50 transition-colors min-h-[44px] flex items-center">Install</a>
+				<a href="https://github.com/The-Focus-AI/hermes-body" target="_blank" rel="noreferrer" class="text-sm text-[#C8102E] min-h-[44px] flex items-center">GitHub →</a>
+			</div>
+		</div>
+	</nav>
+
+	<header class="relative bg-stone-50 dark:bg-stone-950 overflow-hidden border-b border-stone-200 dark:border-stone-800">
+		<div class="absolute top-0 right-0 text-[clamp(10rem,28vw,26rem)] font-light leading-none text-stone-900/[0.04] dark:text-stone-50/[0.04] select-none pointer-events-none pr-4 md:pr-8 pt-2 tabular-nums">
+			01
+		</div>
+
+		<div class="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24 lg:py-32 relative z-10">
+			<div class="grid grid-cols-12 gap-4 md:gap-8">
+				<div class="col-span-12 lg:col-span-8">
+					<span class="text-xs tracking-widest uppercase text-stone-900/40 dark:text-stone-50/40">Reachy Mini App</span>
+					<div class="w-8 h-px bg-[#C8102E] mt-6 mb-8"></div>
+					<h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-stone-900 dark:text-stone-50 leading-none text-balance">
+						hermes-body
+					</h1>
+					<p class="text-lg md:text-xl font-light leading-relaxed text-stone-900 dark:text-stone-50 mt-8 max-w-[52ch] text-pretty">
+						A voice-driven brain for Reachy Mini, backed by Nous Research's hermes-agent.
 					</p>
-					<div class="hero-actions">
-						<a class="btn btn-primary" href="https://github.com/The-Focus-AI/hermes-body" target="_blank" rel="noreferrer">View on GitHub</a>
-						<a class="btn" href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noreferrer">hermes-agent</a>
+					<p class="text-base leading-relaxed text-stone-900/70 dark:text-stone-50/70 mt-6 max-w-[60ch] text-pretty">
+						OpenAI Realtime drives the sub-second voice loop and robot motion — look, dance, antennas, camera. A single <code class="font-mono text-sm bg-stone-100 dark:bg-stone-900 px-1.5 py-0.5">ask_hermes</code> tool reaches a local hermes-agent for web search, calendar, and persistent memory. Cross-channel memory stays in sync via post-turn syncs.
+					</p>
+					<div class="flex flex-wrap items-center gap-4 mt-12">
+						<a href="https://github.com/The-Focus-AI/hermes-body" target="_blank" rel="noreferrer" class="px-6 py-3 min-h-[44px] inline-flex items-center bg-stone-900 dark:bg-stone-50 text-stone-50 dark:text-stone-900 text-sm font-medium tracking-wide hover:bg-stone-800 dark:hover:bg-stone-200 motion-safe:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8102E] focus-visible:ring-offset-2 focus-visible:ring-offset-stone-50 dark:focus-visible:ring-offset-stone-950">
+							View on GitHub
+						</a>
+						<a href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noreferrer" class="px-6 py-3 min-h-[44px] inline-flex items-center border border-stone-200 dark:border-stone-800 text-stone-900/70 dark:text-stone-50/70 text-sm font-medium tracking-wide hover:border-stone-900 dark:hover:border-stone-50 hover:text-stone-900 dark:hover:text-stone-50 motion-safe:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8102E] focus-visible:ring-offset-2 focus-visible:ring-offset-stone-50 dark:focus-visible:ring-offset-stone-950">
+							hermes-agent
+						</a>
 					</div>
 				</div>
-				<div class="hero-visual">
-					<div class="brain-card">
-						<div class="brain-emoji">🧠</div>
-						<div class="brain-stack">
-							<span>OpenAI Realtime · voice + motion</span>
-							<span class="arrow">↕ ask_hermes</span>
-							<span>hermes-agent · memory + tools</span>
+
+				<div class="col-span-12 lg:col-span-4 lg:pt-16">
+					<div class="border border-stone-200 dark:border-stone-800 border-t-2 border-t-[#C8102E] p-8 bg-stone-100/40 dark:bg-stone-900/40">
+						<span class="text-xs tracking-widest uppercase text-stone-900/40 dark:text-stone-50/40">Architecture</span>
+						<div class="mt-6 space-y-6">
+							<div>
+								<div class="text-[11px] tracking-widest uppercase text-stone-900/40 dark:text-stone-50/40 mb-2">01 — Body</div>
+								<div class="text-sm font-medium text-stone-900 dark:text-stone-50">OpenAI Realtime</div>
+								<div class="text-sm text-stone-900/60 dark:text-stone-50/60">voice + motion</div>
+							</div>
+							<div class="flex items-center gap-3 text-xs tracking-widest uppercase text-[#C8102E]">
+								<div class="w-4 h-px bg-[#C8102E]"></div>
+								ask_hermes
+							</div>
+							<div>
+								<div class="text-[11px] tracking-widest uppercase text-stone-900/40 dark:text-stone-50/40 mb-2">02 — Brain</div>
+								<div class="text-sm font-medium text-stone-900 dark:text-stone-50">hermes-agent</div>
+								<div class="text-sm text-stone-900/60 dark:text-stone-50/60">memory + tools</div>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</header>
+		</div>
+	</header>
 
-		<main class="content">
-			<section class="info-grid container">
-				<div class="info-card">
-					<div class="info-icon">🎙️</div>
-					<h3>Realtime voice</h3>
-					<p>Sub-second turn-taking. The robot listens through its mic, OpenAI Realtime handles ASR + reasoning + TTS in a single WebSocket.</p>
+	<section id="overview" class="py-16 md:py-24 lg:py-32 border-b border-stone-200 dark:border-stone-800">
+		<div class="max-w-6xl mx-auto px-4 md:px-8">
+			<div class="grid grid-cols-12 gap-4 md:gap-8 mb-16">
+				<div class="col-span-12 md:col-span-4">
+					<span class="text-xs tracking-widest uppercase text-stone-900/40 dark:text-stone-50/40">§ 01</span>
+					<div class="w-8 h-px bg-[#C8102E] mt-6 mb-8"></div>
+					<h2 class="text-3xl md:text-4xl font-light tracking-tight text-stone-900 dark:text-stone-50 leading-snug text-balance">
+						Three layers, one robot.
+					</h2>
 				</div>
-				<div class="info-card">
-					<div class="info-icon">🤖</div>
-					<h3>Embodied tools</h3>
-					<p>Eight robot tools: <code>look</code>, <code>antennas</code>, <code>emotion</code>, <code>dance</code>, <code>camera</code>, <code>face_tracking</code>, <code>stop_moves</code>, <code>idle</code>.</p>
+				<div class="col-span-12 md:col-span-7 md:col-start-6 md:pt-2">
+					<p class="text-base leading-relaxed text-stone-900/70 dark:text-stone-50/70 max-w-[60ch] text-pretty">
+						hermes-body splits responsibility cleanly. The body listens and moves in real time. The brain remembers and reasons. A single tool call connects them.
+					</p>
 				</div>
-				<div class="info-card">
-					<div class="info-icon">🧠</div>
-					<h3>Knowledge backend</h3>
-					<p>One <code>ask_hermes</code> tool reaches a hermes-agent container for web search, calendar, files, and long-term memory.</p>
-				</div>
-			</section>
+			</div>
 
-			<section class="container install">
-				<h2>Install on your Reachy Mini</h2>
-				<ol class="steps">
-					<li>
-						<strong>Run hermes-agent</strong> in Docker on a machine reachable from the robot. Enable its OpenAI-compatible API server and note the base URL + API key.
-						<a href="https://github.com/The-Focus-AI/hermes-body#2-run-hermes-agent-in-docker" target="_blank" rel="noreferrer">Setup guide →</a>
+			<div class="grid grid-cols-1 md:grid-cols-3 border-t border-stone-200 dark:border-stone-800">
+				<article class="border-b md:border-b-0 md:border-r border-stone-200 dark:border-stone-800 p-8 md:p-10">
+					<div class="text-xs tracking-widest uppercase text-stone-900/40 dark:text-stone-50/40 tabular-nums">01</div>
+					<h3 class="text-xl font-normal text-stone-900 dark:text-stone-50 mt-6 leading-snug">Realtime voice</h3>
+					<p class="text-sm leading-relaxed text-stone-900/70 dark:text-stone-50/70 mt-4 max-w-[48ch] text-pretty">
+						Sub-second turn-taking. The robot listens through its mic; OpenAI Realtime handles ASR, reasoning, and TTS in a single WebSocket.
+					</p>
+				</article>
+				<article class="border-b md:border-b-0 md:border-r border-stone-200 dark:border-stone-800 p-8 md:p-10">
+					<div class="text-xs tracking-widest uppercase text-stone-900/40 dark:text-stone-50/40 tabular-nums">02</div>
+					<h3 class="text-xl font-normal text-stone-900 dark:text-stone-50 mt-6 leading-snug">Embodied tools</h3>
+					<p class="text-sm leading-relaxed text-stone-900/70 dark:text-stone-50/70 mt-4 max-w-[48ch] text-pretty">
+						Eight robot tools — <code class="font-mono text-xs bg-stone-100 dark:bg-stone-900 px-1 py-0.5">look</code>, <code class="font-mono text-xs bg-stone-100 dark:bg-stone-900 px-1 py-0.5">antennas</code>, <code class="font-mono text-xs bg-stone-100 dark:bg-stone-900 px-1 py-0.5">emotion</code>, <code class="font-mono text-xs bg-stone-100 dark:bg-stone-900 px-1 py-0.5">dance</code>, <code class="font-mono text-xs bg-stone-100 dark:bg-stone-900 px-1 py-0.5">camera</code>, <code class="font-mono text-xs bg-stone-100 dark:bg-stone-900 px-1 py-0.5">face_tracking</code>, <code class="font-mono text-xs bg-stone-100 dark:bg-stone-900 px-1 py-0.5">stop_moves</code>, <code class="font-mono text-xs bg-stone-100 dark:bg-stone-900 px-1 py-0.5">idle</code>.
+					</p>
+				</article>
+				<article class="p-8 md:p-10">
+					<div class="text-xs tracking-widest uppercase text-stone-900/40 dark:text-stone-50/40 tabular-nums">03</div>
+					<h3 class="text-xl font-normal text-stone-900 dark:text-stone-50 mt-6 leading-snug">Knowledge backend</h3>
+					<p class="text-sm leading-relaxed text-stone-900/70 dark:text-stone-50/70 mt-4 max-w-[48ch] text-pretty">
+						One <code class="font-mono text-xs bg-stone-100 dark:bg-stone-900 px-1 py-0.5">ask_hermes</code> tool reaches a hermes-agent container for web search, calendar, files, and long-term memory.
+					</p>
+				</article>
+			</div>
+		</div>
+	</section>
+
+	<section id="install" class="py-16 md:py-24 lg:py-32 border-b border-stone-200 dark:border-stone-800">
+		<div class="max-w-6xl mx-auto px-4 md:px-8">
+			<div class="grid grid-cols-12 gap-4 md:gap-8">
+				<div class="col-span-12 md:col-span-4">
+					<span class="text-xs tracking-widest uppercase text-stone-900/40 dark:text-stone-50/40">§ 02</span>
+					<div class="w-8 h-px bg-[#C8102E] mt-6 mb-8"></div>
+					<h2 class="text-3xl md:text-4xl font-light tracking-tight text-stone-900 dark:text-stone-50 leading-snug text-balance">
+						Install on your Reachy Mini.
+					</h2>
+					<p class="text-sm leading-relaxed text-stone-900/60 dark:text-stone-50/60 mt-6 max-w-[40ch]">
+						Four steps from a fresh robot to a talking, listening, moving body.
+					</p>
+				</div>
+
+				<ol class="col-span-12 md:col-span-8 mt-4 md:mt-0">
+					<li class="grid grid-cols-12 gap-4 md:gap-6 border-t border-stone-200 dark:border-stone-800 py-8">
+						<div class="col-span-2 md:col-span-1 text-xs tracking-widest uppercase text-stone-900/40 dark:text-stone-50/40 tabular-nums pt-1">01</div>
+						<div class="col-span-10 md:col-span-11">
+							<h3 class="text-base font-medium text-stone-900 dark:text-stone-50">Run hermes-agent</h3>
+							<p class="text-sm leading-relaxed text-stone-900/70 dark:text-stone-50/70 mt-2 max-w-[60ch] text-pretty">
+								Run hermes-agent in Docker on a machine reachable from the robot. Enable its OpenAI-compatible API server and note the base URL and API key.
+							</p>
+							<a href="https://github.com/The-Focus-AI/hermes-body#2-run-hermes-agent-in-docker" target="_blank" rel="noreferrer" class="inline-block text-sm text-[#C8102E] mt-3 hover:opacity-70 motion-safe:transition-opacity">
+								Setup guide →
+							</a>
+						</div>
 					</li>
-					<li>
-						<strong>Install the app</strong> from the Reachy Mini dashboard (Apps tab → search "hermes-body"), or via the daemon API:
-						<pre><code>curl -X POST http://localhost:8000/api/apps/install \
+
+					<li class="grid grid-cols-12 gap-4 md:gap-6 border-t border-stone-200 dark:border-stone-800 py-8">
+						<div class="col-span-2 md:col-span-1 text-xs tracking-widest uppercase text-stone-900/40 dark:text-stone-50/40 tabular-nums pt-1">02</div>
+						<div class="col-span-10 md:col-span-11">
+							<h3 class="text-base font-medium text-stone-900 dark:text-stone-50">Install the app</h3>
+							<p class="text-sm leading-relaxed text-stone-900/70 dark:text-stone-50/70 mt-2 max-w-[60ch] text-pretty">
+								From the Reachy Mini dashboard — Apps tab, search "hermes-body" — or via the daemon API:
+							</p>
+							<pre class="mt-4 bg-stone-900 dark:bg-stone-950 border border-stone-800 text-stone-50 p-4 md:p-6 overflow-x-auto"><code class="font-mono text-xs md:text-sm leading-relaxed">curl -X POST http://localhost:8000/api/apps/install \
   -H "Content-Type: application/json" \
   -d '{"url":"https://huggingface.co/spaces/wschenk/hermes-body"}'</code></pre>
+						</div>
 					</li>
-					<li>
-						<strong>Configure</strong> the OpenAI API key and hermes-agent endpoint via env vars on the robot. See the README for details.
+
+					<li class="grid grid-cols-12 gap-4 md:gap-6 border-t border-stone-200 dark:border-stone-800 py-8">
+						<div class="col-span-2 md:col-span-1 text-xs tracking-widest uppercase text-stone-900/40 dark:text-stone-50/40 tabular-nums pt-1">03</div>
+						<div class="col-span-10 md:col-span-11">
+							<h3 class="text-base font-medium text-stone-900 dark:text-stone-50">Configure</h3>
+							<p class="text-sm leading-relaxed text-stone-900/70 dark:text-stone-50/70 mt-2 max-w-[60ch] text-pretty">
+								Set the OpenAI API key and hermes-agent endpoint via env vars on the robot. See the README for the full list.
+							</p>
+						</div>
 					</li>
-					<li>
-						<strong>Start it</strong> from the dashboard. The robot listens on its mic and starts moving.
+
+					<li class="grid grid-cols-12 gap-4 md:gap-6 border-t border-b border-stone-200 dark:border-stone-800 py-8">
+						<div class="col-span-2 md:col-span-1 text-xs tracking-widest uppercase text-stone-900/40 dark:text-stone-50/40 tabular-nums pt-1">04</div>
+						<div class="col-span-10 md:col-span-11">
+							<h3 class="text-base font-medium text-stone-900 dark:text-stone-50">Start it</h3>
+							<p class="text-sm leading-relaxed text-stone-900/70 dark:text-stone-50/70 mt-2 max-w-[60ch] text-pretty">
+								Start the app from the dashboard. The robot listens on its mic and begins moving.
+							</p>
+						</div>
 					</li>
 				</ol>
-			</section>
-		</main>
+			</div>
+		</div>
+	</section>
 
-		<footer class="footer">
-			<p>
-				🧠 hermes-body ·
-				<a href="https://github.com/The-Focus-AI/hermes-body" target="_blank" rel="noreferrer">GitHub</a> ·
-				<a href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noreferrer">hermes-agent</a> ·
-				<a href="https://huggingface.co/spaces?filter=reachy_mini" target="_blank" rel="noreferrer">More Reachy Mini apps</a>
-			</p>
-		</footer>
-	</div>
+	<footer class="py-12 md:py-16">
+		<div class="max-w-6xl mx-auto px-4 md:px-8">
+			<div class="grid grid-cols-12 gap-4 md:gap-8 items-baseline">
+				<div class="col-span-12 md:col-span-6">
+					<span class="text-xs tracking-widest uppercase text-stone-900/40 dark:text-stone-50/40">hermes-body</span>
+					<p class="text-sm text-stone-900/60 dark:text-stone-50/60 mt-3 max-w-[48ch]">
+						A Reachy Mini app by The Focus AI.
+					</p>
+				</div>
+				<div class="col-span-12 md:col-span-6 flex flex-wrap gap-x-8 gap-y-3 md:justify-end">
+					<a href="https://github.com/The-Focus-AI/hermes-body" target="_blank" rel="noreferrer" class="text-sm text-stone-900/70 dark:text-stone-50/70 hover:text-[#C8102E] motion-safe:transition-colors min-h-[44px] flex items-center">GitHub</a>
+					<a href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noreferrer" class="text-sm text-stone-900/70 dark:text-stone-50/70 hover:text-[#C8102E] motion-safe:transition-colors min-h-[44px] flex items-center">hermes-agent</a>
+					<a href="https://huggingface.co/spaces?filter=reachy_mini" target="_blank" rel="noreferrer" class="text-sm text-stone-900/70 dark:text-stone-50/70 hover:text-[#C8102E] motion-safe:transition-colors min-h-[44px] flex items-center">Reachy Mini apps</a>
+				</div>
+			</div>
+		</div>
+	</footer>
+
 </body>
 </html>
