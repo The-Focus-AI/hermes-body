@@ -12,6 +12,7 @@ import argparse
 import asyncio
 import atexit
 import logging
+import logging.handlers
 import os
 import signal
 import sys
@@ -64,12 +65,35 @@ def release_instance_lock() -> None:
 
 
 def setup_logging(debug: bool = False) -> None:
+    # The Reachy Mini daemon swallows app stdout/stderr below WARNING, so we
+    # also write to a rotating file the user can `tail -f` over SSH.
     level = logging.DEBUG if debug else logging.INFO
-    logging.basicConfig(
-        level=level,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    fmt = logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         datefmt="%H:%M:%S",
     )
+
+    root = logging.getLogger()
+    root.setLevel(level)
+    for h in list(root.handlers):
+        root.removeHandler(h)
+
+    stream = logging.StreamHandler()
+    stream.setFormatter(fmt)
+    root.addHandler(stream)
+
+    log_path = Path(os.getenv("HERMES_BODY_LOG", str(_project_root / "hermes-body.log")))
+    try:
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        file_handler = logging.handlers.RotatingFileHandler(
+            log_path, maxBytes=5 * 1024 * 1024, backupCount=3
+        )
+        file_handler.setFormatter(fmt)
+        root.addHandler(file_handler)
+        root.info("Logging to %s", log_path)
+    except OSError as e:
+        root.warning("Could not open log file %s: %s", log_path, e)
+
     if not debug:
         logging.getLogger("httpx").setLevel(logging.WARNING)
         logging.getLogger("websockets").setLevel(logging.WARNING)
@@ -417,6 +441,9 @@ class HermesBody(ReachyMiniApp):
     custom_app_url: str | None = None
 
     def run(self, reachy_mini, stop_event: threading.Event) -> None:
+        setup_logging(debug=os.getenv("HERMES_BODY_DEBUG", "").lower() in ("1", "true", "yes"))
+        logger.info("hermes-body launched by Reachy Mini daemon (pid=%d)", os.getpid())
+
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 

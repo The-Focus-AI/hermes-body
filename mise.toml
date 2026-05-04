@@ -209,14 +209,13 @@ ssh -t "$ROBOT_HOST" "cd $ROBOT_PATH && exec \$SHELL -l"
 '''
 
 [tasks.robot-logs]
-description = "Tail hermes-body logs from the Reachy Mini daemon (Ctrl+C to exit)"
+description = "Tail hermes-body's own log file on the robot (Ctrl+C to exit)"
 run = '''
 ROBOT_HOST=${ROBOT_HOST:-pollen@reachy-mini.local}
-# Apps launched from the dashboard inherit reachy-mini-daemon's stdout.
-# Filter to hermes_body lines only and strip the systemd prefix for readability.
-ssh -t "$ROBOT_HOST" "sudo journalctl -u reachy-mini-daemon -f --no-hostname --output=short 2>/dev/null \
-  | grep --line-buffered -E 'hermes_body|hermes-body|HermesBody' \
-  | sed -u 's/launcher.sh\\[[0-9]*\\]: reachy_mini.apps.manager.runner - INFO - //; s/launcher.sh\\[[0-9]*\\]: reachy_mini.apps.manager.runner - ERROR - //'"
+ROBOT_PATH=${ROBOT_PATH:-hermes-body}
+# hermes-body writes a rotating log via setup_logging() because the daemon
+# swallows subprocess stdio below WARNING. tail -F survives rotation + restarts.
+ssh -t "$ROBOT_HOST" "touch $ROBOT_PATH/hermes-body.log && tail -n 200 -F $ROBOT_PATH/hermes-body.log"
 '''
 
 [tasks.robot-restart]
