@@ -1,1 +1,12 @@
+.venv/
+__pycache__/
+*.egg-info/
+.env
+~/.hermes/images/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
 node_modules/
