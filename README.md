@@ -181,6 +181,8 @@ mise run sim              # launch the MuJoCo simulator
 mise run run              # hermes-body --debug
 mise run gradio           # hermes-body --gradio --debug
 mise run smoke-hermes     # smoke-test the Hermes bridge
+mise run show-context     # print the full Hermes identity blob the robot uses
+mise run hermes-logs      # tail the Hermes Docker container logs
 mise run lint             # ruff check
 mise run format           # ruff format
 mise run clean            # nuke .venv + caches
@@ -239,3 +241,96 @@ hermes-body/
 ```
 
 Continuous behaviors (face tracking, head wobble, breathing) run in local threads, never network-bound.
+
+## How it works
+
+### 1. Identity bootstrap
+
+On startup, `hermes_bridge.get_agent_context()` sends a prompt to the Hermes gateway asking for a full identity dump: who Hermes is, what it knows about the user, recent conversation context, memories, and current state. This blob — typically 1,500-3,000 characters — becomes the base of the Realtime system prompt. The robot literally **speaks as Hermes**.
+
+```bash
+mise run show-context   # see exactly what identity the robot will use
+```
+
+### 2. The Realtime session
+
+`OpenAIRealtimeHandler` opens a persistent WebSocket to OpenAI's Realtime API. It sends:
+
+| Field | Source |
+|---|---|
+| `instructions` | Hermes identity + `ROBOT_BODY_INSTRUCTIONS` from `prompts.py` |
+| `tools` | 8 robot tool specs from `tools/core_tools.py` + `ask_hermes` from `openai_realtime.py` |
+| `voice` | `OPENAI_VOICE` from `.env` (default: `cedar`) |
+| `modalities` | `["text", "audio"]` |
+
+### 3. Tool dispatch
+
+When the Realtime model decides to act (look around, express emotion, query Hermes), it emits a function call event. The handler routes it:
+
+```
+Model calls "emotion(scared)"
+  → _handle_emotion() in core_tools.py
+    → if on robot: EmotionQueueMove("scared1", RecordedMoves)
+       plays choreographed 75+ animation from HuggingFace
+    → if on sim: HeadLookMove sequence fallback
+  → result sent back to Realtime
+  → model speaks response incorporating tool result
+```
+
+### 4. Hermes knowledge loop
+
+The `ask_hermes` tool lets the Realtime model reach beyond what it knows:
+
+```
+User: "What's on my calendar today?"
+  → Realtime model calls ask_hermes(query="calendar today")
+  → _handle_hermes_query() does HTTP POST to Hermes Docker gateway
+  → Hermes agent uses its own tools (Google Calendar, web search, etc.)
+  → Response flows back: Realtime model → speaks answer to user
+```
+
+Slow tools (`ask_hermes`, `camera`) play short "still working…" filler audio generated via OpenAI TTS so the user isn't left in silence.
+
+### 5. Cross-channel memory
+
+After each turn, `sync_turn()` posts the conversation back to Hermes:
+
+```
+[ROBOT BODY SYNC] User said: "What's on my calendar?"
+You responded: "You have a meeting at 2pm..."
+```
+
+This means Hermes remembers everything the robot says and hears — conversations through the robot body are part of Hermes' ongoing memory, visible the next time you chat with Hermes directly.
+
+### 6. Continuous behaviors (local threads)
+
+These run independently on the robot, never touching the network:
+
+| Thread | Purpose |
+|---|---|
+| `MovementManager` (100Hz) | Primary moves + breathing + thinking animation + face tracking offsets |
+| `HeadWobbler` (30Hz) | Speech-driven head movement from audio amplitude |
+| `CameraWorker` (25Hz) | Frame capture + face detection + room scanning |
+
+## Tool reference
+
+### Robot body tools
+
+| Tool | What it does | Key parameters |
+|---|---|---|
+| `look` | Move head + antennas expressively | `direction`: left, right, up, down, front |
+| `antennas` | Move antenna stalks independently | `preset`: curious, excited, sad, point_left, point_right, listen, surprised, shy, angry, confused, neutral, wiggle, perk_left, perk_right, droop |
+| `emotion` | Play prerecorded full-body animation | `emotion_name`: happy, sad, surprised, curious, thinking, confused, excited, scared, shy, angry, bored, proud, grateful, tired, loving, fear, disgusted, relieved, impatient, frustrated, success, laughing, welcoming, calming |
+| `dance` | Perform choreographed dance | `dance_name`: groovy_sway_and_roll, headbanger_combo, simple_nod, yeah_nod, chicken_peck, etc. (20 total) |
+| `camera` | Capture and analyze what's in front | _none_ |
+| `face_tracking` | Toggle automatic face following | `enabled`: true/false |
+| `stop_moves` | Clear all queued movements | _none_ |
+| `idle` | Stay still | _none_ |
+
+### Knowledge tool
+
+| Tool | What it does | Key parameters |
+|---|---|---|
+| `ask_hermes` | Query Hermes for web search, calendar, memory, etc. | `query`: string, `include_image`: bool |
+
+This is the only network-bound tool — everything else runs locally on the robot.
