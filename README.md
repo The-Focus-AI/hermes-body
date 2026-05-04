@@ -256,12 +256,12 @@ mise run show-context   # see exactly what identity the robot will use
 
 `OpenAIRealtimeHandler` opens a persistent WebSocket to OpenAI's Realtime API. It sends:
 
-| Field | Source |
-|---|---|
-| `instructions` | Hermes identity + `ROBOT_BODY_INSTRUCTIONS` from `prompts.py` |
-| `tools` | 8 robot tool specs from `tools/core_tools.py` + `ask_hermes` from `openai_realtime.py` |
-| `voice` | `OPENAI_VOICE` from `.env` (default: `cedar`) |
-| `modalities` | `["text", "audio"]` |
+| Field          | Source                                                                                 |
+| -------------- | -------------------------------------------------------------------------------------- |
+| `instructions` | Hermes identity + `ROBOT_BODY_INSTRUCTIONS` from `prompts.py`                          |
+| `tools`        | 8 robot tool specs from `tools/core_tools.py` + `ask_hermes` from `openai_realtime.py` |
+| `voice`        | `OPENAI_VOICE` from `.env` (default: `cedar`)                                          |
+| `modalities`   | `["text", "audio"]`                                                                    |
 
 ### 3. Tool dispatch
 
@@ -306,31 +306,31 @@ This means Hermes remembers everything the robot says and hears — conversation
 
 These run independently on the robot, never touching the network:
 
-| Thread | Purpose |
-|---|---|
+| Thread                    | Purpose                                                                |
+| ------------------------- | ---------------------------------------------------------------------- |
 | `MovementManager` (100Hz) | Primary moves + breathing + thinking animation + face tracking offsets |
-| `HeadWobbler` (30Hz) | Speech-driven head movement from audio amplitude |
-| `CameraWorker` (25Hz) | Frame capture + face detection + room scanning |
+| `HeadWobbler` (30Hz)      | Speech-driven head movement from audio amplitude                       |
+| `CameraWorker` (25Hz)     | Frame capture + face detection + room scanning                         |
 
 ## Tool reference
 
 ### Robot body tools
 
-| Tool | What it does | Key parameters |
-|---|---|---|
-| `look` | Move head + antennas expressively | `direction`: left, right, up, down, front |
-| `antennas` | Move antenna stalks independently | `preset`: curious, excited, sad, point_left, point_right, listen, surprised, shy, angry, confused, neutral, wiggle, perk_left, perk_right, droop |
-| `emotion` | Play prerecorded full-body animation | `emotion_name`: happy, sad, surprised, curious, thinking, confused, excited, scared, shy, angry, bored, proud, grateful, tired, loving, fear, disgusted, relieved, impatient, frustrated, success, laughing, welcoming, calming |
-| `dance` | Perform choreographed dance | `dance_name`: groovy_sway_and_roll, headbanger_combo, simple_nod, yeah_nod, chicken_peck, etc. (20 total) |
-| `camera` | Capture and analyze what's in front | _none_ |
-| `face_tracking` | Toggle automatic face following | `enabled`: true/false |
-| `stop_moves` | Clear all queued movements | _none_ |
-| `idle` | Stay still | _none_ |
+| Tool            | What it does                         | Key parameters                                                                                                                                                                                                                  |
+| --------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `look`          | Move head + antennas expressively    | `direction`: left, right, up, down, front                                                                                                                                                                                       |
+| `antennas`      | Move antenna stalks independently    | `preset`: curious, excited, sad, point_left, point_right, listen, surprised, shy, angry, confused, neutral, wiggle, perk_left, perk_right, droop                                                                                |
+| `emotion`       | Play prerecorded full-body animation | `emotion_name`: happy, sad, surprised, curious, thinking, confused, excited, scared, shy, angry, bored, proud, grateful, tired, loving, fear, disgusted, relieved, impatient, frustrated, success, laughing, welcoming, calming |
+| `dance`         | Perform choreographed dance          | `dance_name`: groovy_sway_and_roll, headbanger_combo, simple_nod, yeah_nod, chicken_peck, etc. (20 total)                                                                                                                       |
+| `camera`        | Capture and analyze what's in front  | _none_                                                                                                                                                                                                                          |
+| `face_tracking` | Toggle automatic face following      | `enabled`: true/false                                                                                                                                                                                                           |
+| `stop_moves`    | Clear all queued movements           | _none_                                                                                                                                                                                                                          |
+| `idle`          | Stay still                           | _none_                                                                                                                                                                                                                          |
 
 ### Knowledge tool
 
-| Tool | What it does | Key parameters |
-|---|---|---|
+| Tool         | What it does                                        | Key parameters                         |
+| ------------ | --------------------------------------------------- | -------------------------------------- |
 | `ask_hermes` | Query Hermes for web search, calendar, memory, etc. | `query`: string, `include_image`: bool |
 
 This is the only network-bound tool — everything else runs locally on the robot.

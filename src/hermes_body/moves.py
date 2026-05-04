@@ -111,11 +111,11 @@ class HeadLookMove(Move):
 
     # Expressive antenna positions for each look direction.
     ANTENNAS_MAP: dict[str, tuple[float, float]] = {
-        "left": (-50.0, 20.0),   # left antenna out, right slightly up
+        "left": (-50.0, 20.0),  # left antenna out, right slightly up
         "right": (20.0, -50.0),  # right antenna out, left slightly up
-        "up": (40.0, 40.0),      # both perked up
+        "up": (40.0, 40.0),  # both perked up
         "down": (-30.0, -30.0),  # both drooped down
-        "front": (0.0, 0.0),     # neutral
+        "front": (0.0, 0.0),  # neutral
     }
 
     def __init__(
@@ -204,9 +204,7 @@ class AntennaMove(Move):
         self._duration = duration
 
         angles = self.PRESETS.get(preset, (0.0, 0.0))
-        self.target_antennas = np.array(
-            [np.deg2rad(angles[0]), np.deg2rad(angles[1])], dtype=np.float64
-        )
+        self.target_antennas = np.array([np.deg2rad(angles[0]), np.deg2rad(angles[1])], dtype=np.float64)
 
     @property
     def duration(self) -> float:
