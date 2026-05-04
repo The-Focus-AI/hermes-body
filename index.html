@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>hermes-body</title>
+	<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+	<div class="hero">
+		<div class="icon">🧠</div>
+		<h1>hermes-body</h1>
+		<p class="tagline">Reachy Mini front end for Nous Research's hermes-agent</p>
+	</div>
+
+	<main class="container">
+		<section class="card">
+			<h2>What it is</h2>
+			<p>OpenAI Realtime is the embodied "brain" — sub-second voice loop and robot motion tools. <a href="https://github.com/NousResearch/hermes-agent">hermes-agent</a> is the knowledge backend, reachable via a single <code>ask_hermes</code> tool. Cross-channel memory stays in sync via post-turn syncs.</p>
+		</section>
+
+		<section class="card">
+			<h2>Requires</h2>
+			<ul>
+				<li>An OpenAI API key (Realtime access)</li>
+				<li>A running hermes-agent Docker container with its OpenAI-compatible HTTP API enabled</li>
+			</ul>
+			<p>See the <a href="https://github.com/The-Focus-AI/hermes-body">GitHub repo</a> for setup.</p>
+		</section>
+
+		<section class="card">
+			<h2>Tools</h2>
+			<p>Robot-side: <code>look</code>, <code>antennas</code>, <code>emotion</code>, <code>dance</code>, <code>camera</code>, <code>face_tracking</code>, <code>stop_moves</code>, <code>idle</code>. Knowledge-side: <code>ask_hermes</code>.</p>
+		</section>
+	</main>
+
+	<footer>
+		<a href="https://github.com/The-Focus-AI/hermes-body">GitHub</a>
+		·
+		<a href="https://github.com/NousResearch/hermes-agent">hermes-agent</a>
+	</footer>
+</body>
+</html>

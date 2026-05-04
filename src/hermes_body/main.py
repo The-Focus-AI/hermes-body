@@ -402,8 +402,17 @@ class HermesBodyCore:
         logger.info("Stopped")
 
 
-class HermesBodyApp:
-    """Reachy Mini Apps entry point for hermes-body."""
+from reachy_mini.apps.app import ReachyMiniApp
+
+
+class HermesBody(ReachyMiniApp):
+    """Reachy Mini Apps entry point for hermes-body.
+
+    Invoked by the Reachy Mini daemon when a user installs hermes-body from
+    Hugging Face. The daemon runs `python -m hermes_body.main`, which calls
+    `wrapped_run()` on this class — that opens the robot connection and calls
+    our `run()` with a connected `ReachyMini` instance.
+    """
 
     custom_app_url: str | None = None
 
@@ -471,4 +480,13 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    # `python -m hermes_body.main` is how the Reachy Mini daemon launches an app:
+    # it owns the ReachyMini connection and expects us to call wrapped_run() so
+    # the connection is opened/closed inside its lifecycle. The standalone
+    # `hermes-body` console script (defined in pyproject.toml) calls main()
+    # directly and never hits this block.
+    app = HermesBody()
+    try:
+        app.wrapped_run()
+    except KeyboardInterrupt:
+        app.stop()

@@ -10,6 +10,7 @@ readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11"
 dependencies = [
+  "reachy-mini>=1.7.0",
   "openai>=1.50.0",
   "fastrtc>=0.0.17",
   "numpy",
@@ -40,7 +41,7 @@ dev = [
 hermes-body = "hermes_body.main:main"
 
 [project.entry-points."reachy_mini_apps"]
-hermes-body = "hermes_body.main:HermesBodyApp"
+hermes-body = "hermes_body.main:HermesBody"
 
 [tool.setuptools.packages.find]
 where = ["src"]

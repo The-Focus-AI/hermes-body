@@ -1,3 +1,16 @@
+---
+title: hermes-body
+emoji: 🧠
+colorFrom: purple
+colorTo: blue
+sdk: static
+pinned: false
+short_description: Reachy Mini front end for Nous Research's hermes-agent
+tags:
+  - reachy_mini
+  - reachy_mini_python_app
+---
+
 # hermes-body
 
 A Reachy Mini front end for [Nous Research's hermes-agent](https://github.com/NousResearch/hermes-agent), modeled on [ClawBody](https://github.com/tomrikert/clawbody).
