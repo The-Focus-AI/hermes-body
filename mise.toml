@@ -1,0 +1,239 @@
+# mise configuration for hermes-body
+# https://mise.jdx.dev/
+
+[tools]
+python = "3.11"
+
+# Auto-create and activate a venv at .venv on `mise install` / cd
+[env]
+_.python.venv = { path = ".venv", create = true }
+
+[tasks.install]
+description = "Install hermes-body and all dependencies (incl. reachy-mini sim)"
+run = """
+uv pip install "reachy-mini[mujoco]"
+uv pip install -e .
+"""
+
+[tasks.install-dev]
+description = "Install dev dependencies"
+depends = ["install"]
+run = "uv pip install -e '.[dev]'"
+
+[tasks.install-yolo]
+description = "Install YOLO face-tracking dependencies"
+depends = ["install"]
+run = "uv pip install -e '.[yolo_vision]'"
+
+[tasks.sim]
+description = "Start the Reachy Mini MuJoCo simulator"
+run = "mjpython -m reachy_mini.daemon.app.main --sim"
+
+[tasks.run]
+description = "Run hermes-body (console mode)"
+run = "hermes-body --debug"
+
+[tasks.gradio]
+description = "Run hermes-body with Gradio UI"
+run = "hermes-body --gradio --debug"
+
+[tasks.smoke-hermes]
+description = "Smoke-test the Hermes bridge against a running gateway"
+run = '''
+python -c "
+import asyncio
+from hermes_body.hermes_bridge import HermesBridge
+
+async def main():
+    h = HermesBridge()
+    print('--- ask ---')
+    r = await h.ask(\"What's 2+2?\")
+    print('content:', r.content[:200] if r.content else None)
+    print('error:', r.error)
+
+    print('--- get_agent_context ---')
+    ctx = await h.get_agent_context()
+    print('identity:', (ctx[:200] + \"...\") if ctx else None)
+
+    print('--- sync_turn ---')
+    await h.sync_turn(\"hello\", \"hi there\")
+    print('sync ok')
+
+asyncio.run(main())
+"
+'''
+
+[tasks.hermes-logs]
+description = "Tail hermes-agent Docker container logs (Ctrl+C to exit)"
+run = "docker logs -f --tail 100 hermes-gateway"
+
+[tasks.format]
+description = "Format with ruff"
+run = "ruff format src/"
+
+[tasks.lint]
+description = "Lint with ruff"
+run = "ruff check src/"
+
+[tasks.clean]
+description = "Remove caches and build artifacts"
+run = """
+rm -rf .venv build dist *.egg-info src/*.egg-info
+find . -type d -name __pycache__ -prune -exec rm -rf {} +
+find . -type d -name .pytest_cache -prune -exec rm -rf {} +
+find . -type d -name .ruff_cache  -prune -exec rm -rf {} +
+"""
+
+# ---------------------------------------------------------------------------
+# Robot deployment
+#
+# Configurable via env (defaults shown):
+#   ROBOT_HOST=pollen@reachy-mini.local
+#   ROBOT_PATH=hermes-body              (relative to remote $HOME)
+#   ROBOT_VENV=/venvs/apps_venv
+#   MAC_IFACE=en0                 (interface used to find LAN IP for Hermes)
+#   HERMES_PORT=8642
+# ---------------------------------------------------------------------------
+
+[tasks.deploy]
+description = "Full robot deploy: rsync code + install + push .env (with LAN IP)"
+depends = ["deploy-code", "deploy-env"]
+run = '''
+ROBOT_HOST=${ROBOT_HOST:-pollen@reachy-mini.local}
+ROBOT_PATH=${ROBOT_PATH:-hermes-body}
+ROBOT_VENV=${ROBOT_VENV:-/venvs/apps_venv}
+
+echo "==> Installing package on $ROBOT_HOST"
+ssh "$ROBOT_HOST" "cd $ROBOT_PATH && $ROBOT_VENV/bin/pip install -e ."
+
+echo ""
+echo "✅ Deployed. To run:"
+echo "   ssh $ROBOT_HOST '$ROBOT_VENV/bin/hermes-body --debug'"
+echo "   or:  mise run robot-run"
+'''
+
+[tasks.deploy-code]
+description = "rsync project to the robot (excludes .venv/.git/.runlogs/.env)"
+run = '''
+ROBOT_HOST=${ROBOT_HOST:-pollen@reachy-mini.local}
+ROBOT_PATH=${ROBOT_PATH:-hermes-body}
+
+echo "==> rsync to $ROBOT_HOST:$ROBOT_PATH"
+rsync -av --delete \
+  --exclude='.venv' \
+  --exclude='__pycache__' \
+  --exclude='.git' \
+  --exclude='.runlogs' \
+  --exclude='.env' \
+  --exclude='*.egg-info' \
+  --exclude='build' \
+  --exclude='dist' \
+  --exclude='node_modules' \
+  --exclude='.pytest_cache' \
+  --exclude='.ruff_cache' \
+  --exclude='.mypy_cache' \
+  ./ "$ROBOT_HOST:$ROBOT_PATH/"
+'''
+
+[tasks.deploy-env]
+description = "Push .env to robot, swapping localhost -> Mac LAN IP for HERMES_BASE_URL"
+run = '''
+ROBOT_HOST=${ROBOT_HOST:-pollen@reachy-mini.local}
+ROBOT_PATH=${ROBOT_PATH:-hermes-body}
+MAC_IFACE=${MAC_IFACE:-en0}
+HERMES_PORT=${HERMES_PORT:-8642}
+
+if [ ! -f .env ]; then
+  echo "ERROR: .env not found in project root" >&2
+  exit 1
+fi
+
+MAC_IP=$(ipconfig getifaddr "$MAC_IFACE" 2>/dev/null || true)
+if [ -z "$MAC_IP" ]; then
+  echo "ERROR: could not detect IP on $MAC_IFACE (set MAC_IFACE=...)" >&2
+  exit 1
+fi
+
+echo "==> Pushing .env to $ROBOT_HOST:$ROBOT_PATH/.env"
+echo "    Rewriting HERMES_BASE_URL -> http://$MAC_IP:$HERMES_PORT/v1"
+
+sed "s|HERMES_BASE_URL=http://localhost:$HERMES_PORT|HERMES_BASE_URL=http://$MAC_IP:$HERMES_PORT|; s|HERMES_BASE_URL=http://127.0.0.1:$HERMES_PORT|HERMES_BASE_URL=http://$MAC_IP:$HERMES_PORT|" .env \
+  | ssh "$ROBOT_HOST" "mkdir -p $ROBOT_PATH && cat > $ROBOT_PATH/.env && chmod 600 $ROBOT_PATH/.env"
+
+echo ""
+echo "==> Verifying Hermes is reachable from the robot..."
+KEY=$(grep '^HERMES_API_KEY=' .env | cut -d= -f2-)
+ssh "$ROBOT_HOST" "curl -fsS -o /dev/null -w 'Hermes /v1/models from robot: HTTP %{http_code}\n' --max-time 5 -H 'Authorization: Bearer $KEY' http://$MAC_IP:$HERMES_PORT/v1/models" \
+  || echo "⚠️  Hermes unreachable from robot. Check macOS firewall / docker port mapping (0.0.0.0:$HERMES_PORT)."
+'''
+
+[tasks.robot-run]
+description = "SSH to the robot and run hermes-body --debug"
+run = '''
+ROBOT_HOST=${ROBOT_HOST:-pollen@reachy-mini.local}
+ROBOT_VENV=${ROBOT_VENV:-/venvs/apps_venv}
+ssh -t "$ROBOT_HOST" "$ROBOT_VENV/bin/hermes-body --debug"
+'''
+
+[tasks.robot-shell]
+description = "Open an SSH shell on the robot in the project directory"
+run = '''
+ROBOT_HOST=${ROBOT_HOST:-pollen@reachy-mini.local}
+ROBOT_PATH=${ROBOT_PATH:-hermes-body}
+ssh -t "$ROBOT_HOST" "cd $ROBOT_PATH && exec \$SHELL -l"
+'''
+
+[tasks.robot-logs]
+description = "Tail hermes-body logs from the Reachy Mini daemon (Ctrl+C to exit)"
+run = '''
+ROBOT_HOST=${ROBOT_HOST:-pollen@reachy-mini.local}
+# Apps launched from the dashboard inherit reachy-mini-daemon's stdout.
+# Filter to hermes_body lines only and strip the systemd prefix for readability.
+ssh -t "$ROBOT_HOST" "sudo journalctl -u reachy-mini-daemon -f --no-hostname --output=short 2>/dev/null \
+  | grep --line-buffered -E 'hermes_body|hermes-body|HermesBody' \
+  | sed -u 's/launcher.sh\\[[0-9]*\\]: reachy_mini.apps.manager.runner - INFO - //; s/launcher.sh\\[[0-9]*\\]: reachy_mini.apps.manager.runner - ERROR - //'"
+'''
+
+[tasks.robot-restart]
+description = "Restart hermes-body via the Reachy dashboard API (no kill needed)"
+run = '''
+ROBOT_HOST=${ROBOT_HOST:-pollen@reachy-mini.local}
+ssh "$ROBOT_HOST" '
+  curl -s -X POST http://localhost:8000/api/apps/stop-current-app >/dev/null
+  sleep 2
+  curl -s -X POST http://localhost:8000/api/apps/start-app/hermes-body | head -c 200
+  echo ""
+'
+'''
+
+[tasks.robot-install-autostart]
+description = "Install systemd unit that auto-launches hermes-body on boot (requires sudo on the robot)"
+run = '''
+ROBOT_HOST=${ROBOT_HOST:-pollen@reachy-mini.local}
+
+echo "==> copying systemd unit to $ROBOT_HOST"
+scp systemd/hermes-body-autostart.service "$ROBOT_HOST":/tmp/hermes-body-autostart.service
+
+ssh -t "$ROBOT_HOST" '
+  set -e
+  sudo install -m 0644 /tmp/hermes-body-autostart.service /etc/systemd/system/hermes-body-autostart.service
+  sudo systemctl daemon-reload
+  sudo systemctl enable hermes-body-autostart.service
+  echo ""
+  echo "✅ Installed and enabled. Will run on next boot."
+  echo "   Manually trigger now with:  sudo systemctl start hermes-body-autostart"
+  rm /tmp/hermes-body-autostart.service
+'
+'''
+
+[tasks.robot-uninstall-autostart]
+description = "Remove the auto-launch systemd unit"
+run = '''
+ROBOT_HOST=${ROBOT_HOST:-pollen@reachy-mini.local}
+ssh -t "$ROBOT_HOST" '
+  sudo systemctl disable --now hermes-body-autostart.service 2>/dev/null || true
+  sudo rm -f /etc/systemd/system/hermes-body-autostart.service
+  sudo systemctl daemon-reload
+  echo "✅ Removed."
+'
+'''
