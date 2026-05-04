@@ -67,6 +67,31 @@ asyncio.run(main())
 description = "Tail hermes-agent Docker container logs (Ctrl+C to exit)"
 run = "docker logs -f --tail 100 hermes-gateway"
 
+[tasks.show-context]
+description = "Print the full Hermes agent context (identity + memory) that the robot uses"
+run = '''
+python -c "
+import asyncio
+from hermes_body.hermes_bridge import HermesBridge
+
+async def main():
+    h = HermesBridge()
+    print('Fetching agent context from Hermes...', end='', flush=True)
+    ctx = await h.get_agent_context()
+    if ctx is None:
+        print(' FAILED')
+        print('Make sure hermes-gateway Docker container is running.')
+    else:
+        print(f' OK ({len(ctx)} chars)')
+        print()
+        print('=' * 70)
+        print(ctx)
+        print('=' * 70)
+
+asyncio.run(main())
+"
+'''
+
 [tasks.format]
 description = "Format with ruff"
 run = "ruff format src/"
